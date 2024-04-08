@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../sequelize');
+const PayappChild = require('./payapp_child');
 
 const Payapp = sequelize.define('Payapp', {
     id: {
@@ -15,5 +16,7 @@ const Payapp = sequelize.define('Payapp', {
     freezeTableName: true,
     tableName: 'Payapp'
 });
+
+Payapp.hasMany(PayappChild, { foreignKey: 'payapp', as: 'childs' });
 
 module.exports = Payapp;

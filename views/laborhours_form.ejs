@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hello Bulma!</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+  </head>
+  <body>
+    <section class="section">
+      <div class="container">
+        <form id="myform">
+          <h1 class="title" id="title">Loading</h1>
+          <div class="field">
+            <label class="label">Detalles</label>
+            <div class="control">
+              <table class="table  is-fullwidth" style="table-layout: fixed" id="details-table">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Phase</th>
+                    <th>Building</th>
+                    <th>Qty/Hour</th>
+                    <th>Unit Price</th>
+                    <th>Amount</th>
+                    <th>Comment</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="field is-grouped">
+            <div class="control">
+              <select
+                class="select"
+                name="select_new_project"
+                id="select_new_project"
+              >
+                <option value="" selected disabled>Select a Project</option>
+                <!-- Aquí se llenarán las opciones de proyecto -->
+              </select>
+            </div>
+            <div class="control">
+              <button
+                type="button"
+                class="button is-primary"
+                onclick="addRow()"
+              >
+                Agregar Fila
+              </button>
+            </div>
+          </div>
+
+          <div class="field is-grouped">
+            <div class="control">
+              <button class="button is-primary" onclick="sendFormData()">Enviar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <script>
+      var data = {};
+
+      function fetchWithoutRedirection(url, requestOptions, maxRedirects = 5) {
+        return fetch(url, requestOptions).then((response) => {
+          if (response.ok) {
+            return response.text();
+          } else if (response.status >= 300 && response.status < 400) {
+            // Si la respuesta es una redirección
+            if (maxRedirects <= 0) {
+              throw new Error(
+                "Se alcanzó el máximo de redirecciones permitidas"
+              );
+            }
+            const redirectUrl = response.headers.get("Location");
+            if (!redirectUrl) {
+              throw new Error(
+                "La respuesta de redirección no contiene una URL de destino"
+              );
+            }
+            return fetchWithoutRedirection(
+              redirectUrl,
+              requestOptions,
+              maxRedirects - 1
+            ); // Llamada recursiva con una redirección menos
+          } else {
+            throw new Error("Respuesta de error recibida: " + response.status);
+          }
+        });
+      }
+
+      function calculateAmount(input) {
+        const tr = input.parentNode.parentNode;
+        const qtyHour = tr.querySelector(".qty-hour").value;
+        const unitPrice = tr.querySelector(".unit-price").value;
+        const amount = qtyHour * unitPrice;
+        tr.querySelector(".amount").value = amount.toFixed(2);
+      }
+
+      function addRow() {
+        const table = document
+          .getElementById("details-table")
+          .getElementsByTagName("tbody")[0];
+        const project = document.getElementById("select_new_project").value;
+        if (project != "" && project != null) {
+          console.log(project);
+          const newRow = table.insertRow(-1);
+          var options = "";
+          var objs = data.payapps.filter(function (elm) {
+            
+            obj = elm;
+            console.log(obj);
+            obj.childs.forEach(function (element) {
+              options += `<option value="${element.id}">${element.phase}</option>`;
+            });
+            newRow.innerHTML = `
+            <td><input class="input" type="text" name="project[]" value ="${project}" readonly ></td>
+            <td>
+                <div class="select">
+                    <select name="phase[]" class="select-phase" onchange="updateUnitPrice(this)">
+                        ${options}
+                    </select>
+                </div>
+            </td>
+            
+            <td><input class="input building" type="text" name="building[]"></td>
+            <td><input class="input qty-hour" type="number" min="0" name="qty_hour[]" onchange="calculateAmount(this)"></td>
+            <td><input class="input unit-price" type="number" min="0" name="unit_price[]" onchange="calculateAmount(this)" value=${obj.childs[0].price} readonly></td>
+            <td><input class="input amount" type="number" readonly></td>
+            <td><textarea class="textarea" name="comment[]"></textarea></td>
+            <input type="hidden" name="payapp[]" value='${obj.id}'>
+          `;
+
+            return elm.project == project;
+          });
+        }
+      }
+
+      function updateUnitPrice(select) {
+        const tr = select.parentNode.parentNode.parentNode;
+        const phase = select.value;
+        const project = tr.querySelector('[name="project[]"]').value;
+        const obj = data.projectData.find(function (elm) {
+          return elm.project == project;
+        });
+        const selectedPhase = obj.childs.find(function (elm) {
+          return elm.id == phase;
+        });
+        const unitPriceInput = tr.querySelector(".unit-price");
+        unitPriceInput.value = selectedPhase.price;
+        calculateAmount(unitPriceInput); // Update amount when unit price changes
+      }
+
+      const myHeaders = new Headers();
+
+      const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow",
+      };
+
+      fetchWithoutRedirection("/payapp/St. Jude HVAC (Jose)", requestOptions)
+        .then((res) => {
+          res = JSON.parse(res);
+          data = res;
+
+          const select = document.getElementById("select_new_project");
+          const title = document.getElementById("title");
+          console.log(res);
+          res.projects.forEach((project) => {
+            if (project != null) {
+              console.log(project);
+              const option = document.createElement("option");
+              option.value = project;
+              option.textContent = project.slice(3);
+              select.appendChild(option);
+            }
+          });
+          title.innerHTML = res.payapps[0].subcontractor;
+        })
+        .catch((error) => console.error(error));
+
+      ;
+
+      function sendFormData() {
+        const formData = new FormData(document.getElementById("myform"));
+        const formDataObject = {};
+      
+        for (const [key, value] of formData.entries()) {
+          if (!formDataObject[key]) {
+            formDataObject[key] = [value];
+          } else {
+            formDataObject[key].push(value);
+          }
+        }
+      
+        const jsonData = JSON.stringify(formDataObject);
+      
+        fetch("/laborhours_form/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: jsonData
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Hubo un problema al enviar el formulario.');
+          }
+          alert('SENDED 👍');
+          window.location = '';
+          return response.text();
+        })
+        .then(data => {
+          console.log(data);
+        })
+        .catch(error => {
+          alert('Error');
+          console.error('Error:', error);
+        });
+      }
+      
+    </script>
+    
+  </body>
+</html>
