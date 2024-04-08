@@ -1,7 +1,7 @@
 {
-  "name": "express-hello-world",
+  "name": "jem-external-service",
   "version": "1.0.0",
-  "description": "Express Hello World on Render",
+  "description": "jem-external-service",
   "main": "app.js",
   "repository": "https://github.com/render-examples/express-hello-world",
   "author": "Render Developers",
@@ -11,9 +11,14 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "sequelize": "^6.37.2",
+    "sqlite3": "^5.1.7"
   },
   "engines": {
     "node": ">=14"
-  }
+  },
+  "devDependencies": {}
 }
