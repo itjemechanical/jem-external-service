@@ -66,7 +66,7 @@
     </section>
 
     <script>
-      var data = {};
+      let data;
 
       function fetchWithoutRedirection(url, requestOptions, maxRedirects = 5) {
         return fetch(url, requestOptions).then((response) => {
@@ -110,52 +110,54 @@
           .getElementsByTagName("tbody")[0];
         const project = document.getElementById("select_new_project").value;
         if (project != "" && project != null) {
-          console.log(project);
+          console.log(data);1978
           const newRow = table.insertRow(-1);
           var options = "";
-          var objs = data.payapps.filter(function (elm) {
-            
-            obj = elm;
-            console.log(obj);
-            obj.childs.forEach(function (element) {
-              options += `<option value="${element.id}">${element.phase}</option>`;
-            });
-            newRow.innerHTML = `
-            <td><input class="input" type="text" name="project[]" value ="${project}" readonly ></td>
-            <td>
-                <div class="select">
-                    <select name="phase[]" class="select-phase" onchange="updateUnitPrice(this)">
-                        ${options}
-                    </select>
-                </div>
-            </td>
-            
-            <td><input class="input building" type="text" name="building[]"></td>
-            <td><input class="input qty-hour" type="number" min="0" name="qty_hour[]" onchange="calculateAmount(this)"></td>
-            <td><input class="input unit-price" type="number" min="0" name="unit_price[]" onchange="calculateAmount(this)" value=${obj.childs[0].price} readonly></td>
-            <td><input class="input amount" type="number" readonly></td>
-            <td><textarea class="textarea" name="comment[]"></textarea></td>
-            <input type="hidden" name="payapp[]" value='${obj.id}'>
-          `;
-
-            return elm.project == project;
+          var objs = data.payapps.filter(function (obj) {
+            if(obj.project == project){
+              obj.childs.forEach(function (element) {
+                options += `<option value="${element.id}">${element.phase} (${obj.category})</option>`;
+              });
+              newRow.innerHTML = `
+              <td><input class="input" type="text" name="project[]" value ="${project}" readonly ></td>
+              <td>
+                  <div class="select">
+                      <select name="phase[]" class="select-phase" onchange="updatePhase(this)">
+                          ${options}
+                      </select>
+                  </div>
+              </td>
+              
+              <td><input class="input building" type="text" name="building[]"></td>
+              <td><input class="input qty-hour" type="number" min="0" name="qty_hour[]" onchange="calculateAmount(this)"></td>
+              <td><input class="input unit-price" type="number" min="0" name="unit_price[]" onchange="calculateAmount(this)" value=${obj.childs[0].price} readonly></td>
+              <td><input class="input amount" type="number" readonly></td>
+              <td><textarea class="textarea" name="comment[]"></textarea></td>
+              <input type="hidden" name="payapp[]" value='${obj.id}'>
+              `;
+            }
+            return obj.project == project;
           });
         }
       }
 
-      function updateUnitPrice(select) {
+      function updatePhase(select) {
         const tr = select.parentNode.parentNode.parentNode;
         const phase = select.value;
         const project = tr.querySelector('[name="project[]"]').value;
-        const obj = data.projectData.find(function (elm) {
-          return elm.project == project;
-        });
-        const selectedPhase = obj.childs.find(function (elm) {
-          return elm.id == phase;
-        });
-        const unitPriceInput = tr.querySelector(".unit-price");
-        unitPriceInput.value = selectedPhase.price;
-        calculateAmount(unitPriceInput); // Update amount when unit price changes
+        selectedPhase = null;
+
+        data.payapps.forEach(function (payapp) {
+          if(payapp.project == project){
+            payapp.childs.forEach(function (elm2) {
+              if(elm2.id == phase){
+                const unitPriceInput = tr.querySelector(".unit-price");
+                unitPriceInput.value = elm2.price;
+                calculateAmount(unitPriceInput);
+              }
+            });
+          }
+        });        
       }
 
       const myHeaders = new Headers();
@@ -168,12 +170,10 @@
 
       fetchWithoutRedirection("/payapp/St. Jude HVAC (Jose)", requestOptions)
         .then((res) => {
-          res = JSON.parse(res);
-          data = res;
-
+          data = JSON.parse(res);
+          var res = JSON.parse(res);
           const select = document.getElementById("select_new_project");
           const title = document.getElementById("title");
-          console.log(res);
           res.projects.forEach((project) => {
             if (project != null) {
               console.log(project);

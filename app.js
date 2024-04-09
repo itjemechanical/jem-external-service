@@ -10,8 +10,8 @@ app.use(express.json());
 
 //services
 const payappService = require("./services/payapp_service");
-const render = require("./services/render");
+const lbhService = require("./services/labor_hours_form_service");
 app.use('/payapp', payappService);
-app.use('/', render);
+app.use('/', lbhService);
 
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+const server = app.listen(port, () => console.log(`Listening on port ${port}!`));
