@@ -10,7 +10,7 @@ const PayappChild = sequelize.define('PayappChild', {
     },
     payapp: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     phase: {
         type: DataTypes.STRING,

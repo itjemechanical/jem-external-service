@@ -5,8 +5,8 @@ const Payapp = require('../models/payapp');
 // Crear un enrutador de Express
 const router = express.Router();
 
-router.get('/:subcontractor', async (req, res) => {
-    const subcontractor = req.params.subcontractor;
+router.get('/', async (req, res) => {
+    const subcontractor = req.subcontractor;
     try {
         const payappsWithChildren = await Payapp.findAll({
             where: { subcontractor: subcontractor },
@@ -25,19 +25,6 @@ router.get('/:subcontractor', async (req, res) => {
             payapps:payappsWithChildren,
             projects: projects
         });
-    } catch (error) {
-        console.error('Error al buscar por subcontractor:', error);
-        res.status(500).json({ error: 'Error al buscar por subcontractor' });
-    }
-});
-
-router.get('/', async (req, res) => {
-    try {
-        const payappsWithChildren = await Payapp.findAll({
-            include: 'childs',
-        });
-
-        res.json(payappsWithChildren);
     } catch (error) {
         console.error('Error al buscar por subcontractor:', error);
         res.status(500).json({ error: 'Error al buscar por subcontractor' });

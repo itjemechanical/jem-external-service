@@ -17,6 +17,6 @@ const Payapp = sequelize.define('Payapp', {
     tableName: 'Payapp'
 });
 
-Payapp.hasMany(PayappChild, { foreignKey: 'payapp', as: 'childs' });
+Payapp.hasMany(PayappChild, { foreignKey: 'payapp', as: 'childs'});
 
 module.exports = Payapp;

@@ -29,7 +29,10 @@ const User = sequelize.define('User', {
 });
 
 User.prototype.generateAuthToken = function() {
-    return jwt.sign({ user: this.user }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    return jwt.sign({ 
+        user: this.user,
+        subcontractor: this.subcontractor,
+    }, process.env.JWT_SECRET, { expiresIn: '24h' });
 };
 
 User.prototype.validatePassword = function(password) {

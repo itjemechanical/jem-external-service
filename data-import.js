@@ -15,12 +15,21 @@ async function fetchDataAndSaveToDatabase() {
         let payapps = await axios.get(url_payapps);
         let payapp_childs = await axios.get(url_payapp_childs);
         let users = await axios.get(url_users);
-
+        
         await sequelize.sync();
 
-        payapps = payapps.data.filter((el) => el.id != '' );
-        payapp_childs = payapp_childs.data.filter((el) => el.id != '' )
-        users = users.data.filter((el) => el.user != '' )
+        let payapps_list = [];
+        payapps = payapps.data.filter((el) => {
+            if(el.id != '' && !payapps_list.includes(el.id) ){
+                payapps_list.push(el.id);
+            }
+            return el.id != '';
+        });
+        
+        payapp_childs = payapp_childs.data.filter((el) => {
+            return el.id != '' && payapps_list.includes(el.payapp);
+        })
+        users = users.data.filter((el) => (el.user != '') );
 
         await Payapp.bulkCreate(payapps);
         await PayappChild.bulkCreate(payapp_childs);

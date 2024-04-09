@@ -8,12 +8,10 @@ const { Op } = require('sequelize');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    // Renderizar la plantilla y pasarle datos
     res.render('laborhours_form');
 });
 
-router.post('/laborhours_form/', (req, res) => {
-    // Renderizar la plantilla y pasarle datos
+router.post('/save/', (req, res) => {
     const url = process.env.URL_APPSCRIPT + '?mode=rest&service=savelaborhours';
     body = req.body;
     axios.post(url, body)

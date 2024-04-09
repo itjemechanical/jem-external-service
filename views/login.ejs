@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+  </head>
+  <body>
+    <section class="section">
+      <div class="container">
+        <div class="columns is-centered">
+          <div class="column is-half">
+            <div class="box">
+              <h1 class="title">Login</h1>
+              <form id="loginForm">
+                <div class="field">
+                  <label class="label">User</label>
+                  <div class="control">
+                    <input
+                      class="input"
+                      type="text"
+                      placeholder="Enter your user/email"
+                      name="user"
+                    />
+                  </div>
+                </div>
+                <div class="field">
+                  <label class="label">Password</label>
+                  <div class="control">
+                    <input
+                      class="input"
+                      type="password"
+                      placeholder="Enter your password"
+                      name="password"
+                    />
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="control">
+                    <button class="button is-primary" type="submit">
+                      Login
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bulma-modal-fx/dist/js/modal-fx.min.js"></script>
+    <script>
+        /*if(localStorage.getItem('token')){
+          window.location.href = "/";
+        }*/
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginForm = document.getElementById("loginForm");
+        
+            loginForm.addEventListener("submit", async (e) => {
+              e.preventDefault();
+        
+              const formData = new FormData(loginForm);
+              const user = formData.get("user");
+              const password = formData.get("password");
+        
+              try {
+                const response = await fetch("/auth/login", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ user, password }),
+                });
+        
+                if (!response.ok) {
+                  const errorData = await response.json();
+                  throw new Error(errorData.error);
+                }
+        
+                const { token } = await response.json();
+                // Guardar el token en localStorage
+                localStorage.setItem("token", token);
+                // Redireccionar al usuario a otra página
+                window.location.href = "/"; 
+                
+              } catch (error) {
+                console.error(error.message);
+                // Aquí puedes mostrar un mensaje de error al usuario, por ejemplo, utilizando Bulma modal.
+              }
+            });
+          });
+    </script>
+  </body>
+</html>

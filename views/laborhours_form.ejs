@@ -1,99 +1,90 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hello Bulma!</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
-    />
-  </head>
-  <body>
-    <section class="section">
-      <div class="container">
-        <form id="myform">
-          <h1 class="title" id="title">Loading</h1>
-          <div class="field">
-            <label class="label">Detalles</label>
-            <div class="control">
-              <table class="table  is-fullwidth" style="table-layout: fixed" id="details-table">
-                <thead>
-                  <tr>
-                    <th>Project</th>
-                    <th>Phase</th>
-                    <th>Building</th>
-                    <th>Qty/Hour</th>
-                    <th>Unit Price</th>
-                    <th>Amount</th>
-                    <th>Comment</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="field is-grouped">
-            <div class="control">
-              <select
-                class="select"
-                name="select_new_project"
-                id="select_new_project"
-              >
-                <option value="" selected disabled>Select a Project</option>
-                <!-- Aquí se llenarán las opciones de proyecto -->
-              </select>
-            </div>
-            <div class="control">
-              <button
-                type="button"
-                class="button is-primary"
-                onclick="addRow()"
-              >
-                Agregar Fila
-              </button>
-            </div>
-          </div>
-
-          <div class="field is-grouped">
-            <div class="control">
-              <button class="button is-primary" onclick="sendFormData()">Enviar</button>
-            </div>
-          </div>
-        </form>
+<%- include('partials/head') -%>
+<section class="section">
+  <div class="container">
+    <form id="myform">
+      <h1 class="title" id="title">Loading</h1>
+      <div class="field">
+        <label class="label">Detalles</label>
+        <div class="control">
+          <table class="table  is-fullwidth" style="table-layout: fixed" id="details-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Phase</th>
+                <th>Building</th>
+                <th>Qty/Hour</th>
+                <th>Unit Price</th>
+                <th>Amount</th>
+                <th>Comment</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
-    </section>
+
+      <div class="field is-grouped">
+        <div class="control">
+          <select
+            class="select"
+            name="select_new_project"
+            id="select_new_project"
+          >
+            <option value="" selected disabled>Select a Project</option>
+            <!-- Aquí se llenarán las opciones de proyecto -->
+          </select>
+        </div>
+        <div class="control">
+          <button
+            type="button"
+            class="button is-primary"
+            onclick="addRow()"
+          >
+            Agregar Fila
+          </button>
+        </div>
+      </div>
+
+      <div class="field is-grouped">
+        <div class="control">
+          <button class="button is-primary" onclick="sendFormData()">Enviar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') -%>
+    
 
     <script>
       let data;
 
-      function fetchWithoutRedirection(url, requestOptions, maxRedirects = 5) {
-        return fetch(url, requestOptions).then((response) => {
-          if (response.ok) {
-            return response.text();
-          } else if (response.status >= 300 && response.status < 400) {
-            // Si la respuesta es una redirección
-            if (maxRedirects <= 0) {
-              throw new Error(
-                "Se alcanzó el máximo de redirecciones permitidas"
-              );
+      function fetchWithToken(url, options = {}) {
+        const token = localStorage.getItem('token');
+        
+        // Añadir el token al encabezado Authorization si está disponible
+        if (token) {
+          options.headers = {
+            ...options.headers,
+            'Authorization': `${token}`
+          };
+        }
+        
+        return fetch(url, options)
+          .then(response => {
+            if (!response.ok) {
+              if (response.status === 401) { 
+                window.location.href = '/auth/login';
+              }
+              throw new Error('Request failed with status ' + response.status);
             }
-            const redirectUrl = response.headers.get("Location");
-            if (!redirectUrl) {
-              throw new Error(
-                "La respuesta de redirección no contiene una URL de destino"
-              );
-            }
-            return fetchWithoutRedirection(
-              redirectUrl,
-              requestOptions,
-              maxRedirects - 1
-            ); // Llamada recursiva con una redirección menos
-          } else {
-            throw new Error("Respuesta de error recibida: " + response.status);
-          }
-        });
+            return response;
+          })
+          .catch(error => {
+            console.error('Fetch Error:', error);
+            throw error;
+          });
       }
 
       function calculateAmount(input) {
@@ -110,7 +101,7 @@
           .getElementsByTagName("tbody")[0];
         const project = document.getElementById("select_new_project").value;
         if (project != "" && project != null) {
-          console.log(data);1978
+          console.log(data);
           const newRow = table.insertRow(-1);
           var options = "";
           var objs = data.payapps.filter(function (obj) {
@@ -168,13 +159,18 @@
         redirect: "follow",
       };
 
-      fetchWithoutRedirection("/payapp/St. Jude HVAC (Jose)", requestOptions)
+      fetchWithToken("/payapp/", requestOptions)
         .then((res) => {
-          data = JSON.parse(res);
-          var res = JSON.parse(res);
+          if (res.status === 401) {
+            window.location.href = "/auth/login";
+          }
+          return res.json();
+        })
+        .then((dt) => {
+          data = dt;
           const select = document.getElementById("select_new_project");
           const title = document.getElementById("title");
-          res.projects.forEach((project) => {
+          dt.projects.forEach((project) => {
             if (project != null) {
               console.log(project);
               const option = document.createElement("option");
@@ -183,11 +179,10 @@
               select.appendChild(option);
             }
           });
-          title.innerHTML = res.payapps[0].subcontractor;
+          title.innerHTML = dt.payapps[0].subcontractor;
         })
         .catch((error) => console.error(error));
 
-      ;
 
       function sendFormData() {
         const formData = new FormData(document.getElementById("myform"));
@@ -203,7 +198,7 @@
       
         const jsonData = JSON.stringify(formDataObject);
       
-        fetch("/laborhours_form/", {
+        fetch("/labor_hours/save", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -229,5 +224,3 @@
       
     </script>
     
-  </body>
-</html>
