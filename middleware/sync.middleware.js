@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { log } = require('console');
 
-const filePath = path.join('./logs/lastSyncTaskExecution.txt');
+const filePath = path.join('./logs/lastSyncTaskExecution.json');
 const sync_time = 12 * 60 * 60; // en segundos
 
 //urls
