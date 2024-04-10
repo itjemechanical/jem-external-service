@@ -10,11 +10,9 @@ function authenticateJWT(req, res, next) {
         } else {
             req.subcontractor = decodedToken.subcontractor;
             req.user = decodedToken.user;
-            
+            next();
         }
     });
-
-    next();
 }
 
 

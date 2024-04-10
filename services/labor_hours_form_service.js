@@ -4,6 +4,8 @@ const PayappChild = require('../models/payapp_child');
 const axios = require('axios');
 const { Op } = require('sequelize');
 
+const authMiddleware = require('../middleware/auth.middleware');
+
 // Crear un enrutador de Express
 const router = express.Router();
 
@@ -11,12 +13,12 @@ router.get('/', (req, res) => {
     res.render('laborhours_form');
 });
 
-router.post('/save/', (req, res) => {
+router.post('/save/', authMiddleware, (req, res) => {
     const url = process.env.URL_APPSCRIPT + '?mode=rest&service=savelaborhours';
     body = req.body;
     axios.post(url, body)
     .then(response => {
-      console.log('Respuesta del servicio:', response.data);
+      console.log('AppScriptResponse\n:', response.data);
       res.json(req.body);
     })
     .catch(error => {
