@@ -47,7 +47,7 @@
 
       <div class="field is-grouped">
         <div class="control">
-          <button type="button" class="button is-primary" onclick="sendFormData()">Enviar</button>
+          <button type="button" class="button is-primary" onclick="sendFormData()" id="submitButton">Enviar</button>
         </div>
       </div>
     </form>
@@ -180,6 +180,9 @@
 
 
   function sendFormData() {
+    const submitButton = document.getElementById('submitButton');
+    submitButton.classList.add('is-loading');
+
     const formData = new FormData(document.getElementById("myform"));
     const formDataObject = {};
   
