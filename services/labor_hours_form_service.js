@@ -18,7 +18,7 @@ router.post('/save/', authMiddleware, (req, res) => {
     body = req.body;
     axios.post(url, body)
     .then(response => {
-      console.log('AppScriptResponse\n:', response.data);
+      console.log('AppScriptResponse:\n', response.data);
       res.json(req.body);
     })
     .catch(error => {

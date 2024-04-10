@@ -13,12 +13,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 //services
+const syncMiddleware = require("./middleware/sync.middleware");
 const authMiddleware = require("./middleware/auth.middleware");
 
 const payappService = require("./services/payapp_service");
 const lbhService = require("./services/labor_hours_form_service");
 const authService = require("./services/auth.service");
 
+app.use(syncMiddleware);
 app.use('/payapp', authMiddleware, payappService);
 app.use('/auth', authService);
 app.use('/labor_hours', lbhService);
